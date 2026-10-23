@@ -4,7 +4,6 @@ import { getCurrentUser } from '@/lib/auth'
 import { isBdeStaff } from '@/lib/permissions'
 import { logAuditEvent } from '@/lib/audit'
 import { notifyAllUsers } from '@/lib/notifications'
-import { EventStatus } from '@prisma/client'
 import { z } from 'zod'
 
 const createEventSchema = z.object({
@@ -90,7 +89,7 @@ export async function POST(req: Request) {
         startsAt: new Date(startDate),
         endsAt: new Date(endDate),
         capacity: maxAttendees || null,
-        status: EventStatus.UPCOMING,
+        status: 'UPCOMING',
         organizerId: user.id,
       },
       include: {

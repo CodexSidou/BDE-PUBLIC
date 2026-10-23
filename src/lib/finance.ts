@@ -72,7 +72,7 @@ export async function getFinancialSummary(
     }
   }
 
-  const projectInvestments = budgets.map((b) => {
+  const projectInvestments = budgets.map((b: (typeof budgets)[number]) => {
     const allocated = Number(b.allocatedAmount)
     const totalInvested = projectExpenseMap.get(b.projectId) ?? 0
     return {
@@ -105,7 +105,7 @@ export async function getFinancialSummary(
   })
   const pendingExpensesCount = pendingRequests.length
   const pendingExpensesTotal = pendingRequests.reduce(
-    (sum, r) => sum + Number(r.requestedAmount),
+    (sum: number, r: { requestedAmount: any }) => sum + Number(r.requestedAmount),
     0
   )
 
@@ -119,7 +119,7 @@ export async function getFinancialSummary(
     },
   })
   const approvedUnpaidTotal = approvedUnpaidRequests.reduce(
-    (sum, r) => sum + Number(r.requestedAmount),
+    (sum: number, r: { requestedAmount: any }) => sum + Number(r.requestedAmount),
     0
   )
 
