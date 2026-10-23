@@ -3,15 +3,26 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser, hashPassword } from '@/lib/auth'
 import { isExecutive, canAssignRole } from '@/lib/permissions'
 import { logAuditEvent } from '@/lib/audit'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@/types'
 import { z } from 'zod'
+
+const ROLES: [UserRole, ...UserRole[]] = [
+  'VISITOR',
+  'STUDENT',
+  'CLASS_DELEGATE',
+  'BDE_MEMBER',
+  'PROJECT_MANAGER',
+  'TREASURER',
+  'VICE_PRESIDENT',
+  'PRESIDENT',
+]
 
 const createMemberSchema = z.object({
   email: z.string().email('Format email invalide'),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
   firstName: z.string().min(2, 'Le prénom est requis'),
   lastName: z.string().min(2, 'Le nom est requis'),
-  role: z.nativeEnum(UserRole).default(UserRole.BDE_MEMBER),
+  role: z.enum(ROLES).default('BDE_MEMBER'),
   studentNumber: z.string().optional(),
   department: z.string().optional(),
   studyYear: z.string().optional(),
@@ -19,7 +30,7 @@ const createMemberSchema = z.object({
 
 const updateUserSchema = z.object({
   targetUserId: z.string().uuid(),
-  role: z.nativeEnum(UserRole).optional(),
+  role: z.enum(ROLES).optional(),
   isActive: z.boolean().optional(),
 })
 
