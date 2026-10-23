@@ -17,10 +17,12 @@ import {
   Settings,
   FileSpreadsheet,
   Eye,
+  QrCode,
   Menu,
   X,
   ChevronRight,
   Shield,
+  Mail,
 } from 'lucide-react'
 import { SessionUser } from '@/types'
 import { isBdeStaff, isFinanceManager, isExecutive } from '@/lib/permissions'
@@ -100,6 +102,13 @@ export default function Sidebar({ user }: SidebarProps) {
       href: '/dashboard/notifications',
       icon: Bell,
       show: true,
+    },
+    {
+      label: 'Messages Reçus',
+      href: '/dashboard/messages',
+      icon: Mail,
+      show: isExec,
+      badge: 'BDE',
     },
     {
       label: 'Utilisateurs & Rôles',
@@ -270,11 +279,11 @@ export default function Sidebar({ user }: SidebarProps) {
 
             <div className="pt-4 border-t border-white/10">
               <Link
-                href="/verify"
+                href="/verify?mode=camera"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-accent/20 hover:bg-accent/30 text-white border border-accent/40 shadow-glow transition-all"
               >
-                <Eye className="w-4 h-4 text-emerald-400" />
+                <QrCode className="w-4 h-4 text-cyan-400" />
                 <span>Scanner un QR Badge</span>
               </Link>
             </div>
@@ -342,10 +351,10 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Quick Verification Link */}
         <div className="mt-8 pt-4 border-t border-white/10">
           <Link
-            href="/verify"
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/5 border border-dashed border-white/10 transition-colors"
+            href="/verify?mode=camera"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-accent/15 border border-dashed border-accent/30 transition-all group"
           >
-            <Eye className="w-3.5 h-3.5 text-accent-cyan" />
+            <QrCode className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-12 transition-transform" />
             <span>Scanner un QR Badge</span>
           </Link>
         </div>

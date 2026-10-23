@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import {
   Settings,
   Shield,
@@ -18,7 +19,10 @@ import {
   Users,
   Award,
   Calendar,
-  FolderKanban
+  FolderKanban,
+  Mail,
+  UserPlus,
+  QrCode,
 } from 'lucide-react'
 import { SessionUser } from '@/types'
 
@@ -84,10 +88,24 @@ export default function SettingsClient({ user, stats }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/dashboard/messages"
+            className="px-3 py-1.5 rounded-xl bg-navy-800 hover:bg-navy-700 border border-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <Mail className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Messages Reçus</span>
+          </Link>
+          <Link
+            href="/dashboard/admin/users"
+            className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-glow"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Créer Membre</span>
+          </Link>
           <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-accent/20 border border-accent/40 text-accent-glow flex items-center gap-2 shadow-glow">
             <Shield className="w-3.5 h-3.5" />
-            Espace Direction (Président & VP)
+            Espace Direction
           </span>
         </div>
       </div>

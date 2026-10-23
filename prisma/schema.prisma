@@ -132,6 +132,7 @@ enum NotificationType {
   FINANCE
   BADGE
   IDEA
+  CONTACT
 }
 
 // 1. User & Account Management
@@ -583,4 +584,25 @@ model PlatformSettings {
   value       String   @db.Text
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+// 13. Contact Messages from public form
+model ContactMessage {
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  category  String    @default("Autre")
+  message   String    @db.Text
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  replied   Boolean   @default(false)
+  repliedAt DateTime?
+  notes     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isRead])
+  @@index([category])
+  @@index([createdAt])
 }

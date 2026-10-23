@@ -16,6 +16,7 @@ import {
   Sparkles,
   Calendar,
   FolderKanban,
+  QrCode,
 } from 'lucide-react'
 import { SessionUser } from '@/types'
 
@@ -235,6 +236,15 @@ export default function Navbar({
                         <span>Mon Badge INSIM ID</span>
                       </Link>
 
+                      <Link
+                        href="/verify?mode=camera"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-cyan-300 hover:text-cyan-200 hover:bg-cyan-500/10 font-medium"
+                      >
+                        <QrCode className="w-4 h-4 text-cyan-400" />
+                        <span>Scanner un QR Badge</span>
+                      </Link>
+
                       {isBde && (
                         <Link
                           href="/dashboard/bde"
@@ -366,6 +376,15 @@ export default function Navbar({
                     <span>Mon Profil</span>
                   </Link>
                 </div>
+
+                <Link
+                  href="/verify?mode=camera"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-accent/30 to-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs shadow-glow transition-all"
+                >
+                  <QrCode className="w-4 h-4 text-cyan-400" />
+                  <span>Scanner un QR Badge INSIM</span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 text-sm font-medium pt-2"

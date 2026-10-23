@@ -92,6 +92,54 @@ async function runTests() {
   const nonExistentBadge = await verifyBadgeByCode('INSIM-FAKE-9999-XXXX')
   assert(nonExistentBadge.status === 'NOT_FOUND' && nonExistentBadge.isValid === false, 'Non-existent or forged badge code returns NOT_FOUND')
 
+  // 5. QR CODE SCANNER PAYLOAD PARSING TESTS
+  console.log('\n📋 5. QR Code Scanner Payload Parsing & Recognition Tests:')
+  const { parseInsimQrPayload } = await import('../src/components/BadgeScanner')
+
+  const directCodePayload = parseInsimQrPayload('INSIM-8B4F-29E1-C34A')
+  assert(directCodePayload.isBadge === true && directCodePayload.badgeCode === 'INSIM-8B4F-29E1-C34A', 'Parses direct INSIM badge code string')
+
+  const urlPayload = parseInsimQrPayload('https://bde-bice.vercel.app/verify/INSIM-4D9A-71C5-9F2B')
+  assert(urlPayload.isBadge === true && urlPayload.badgeCode === 'INSIM-4D9A-71C5-9F2B', 'Extracts badge code from official https verify URL')
+
+  const localUrlPayload = parseInsimQrPayload('http://localhost:3000/verify/INSIM-0000-REVOKED-X1')
+  assert(localUrlPayload.isBadge === true && localUrlPayload.badgeCode === 'INSIM-0000-REVOKED-X1', 'Extracts badge code from localhost verify URL')
+
+  const eventUrlPayload = parseInsimQrPayload('https://bde-bice.vercel.app/dashboard/events')
+  assert(eventUrlPayload.isBadge === false && eventUrlPayload.isSiteUrl === true, 'Recognizes internal INSIM site URL')
+
+  const randomPayload = parseInsimQrPayload('HELLO WORLD 1234')
+  assert(randomPayload.isBadge === false && randomPayload.isSiteUrl === false && randomPayload.badgeCode === null, 'Correctly handles non-INSIM arbitrary QR codes')
+
+  // 6. PRESIDENT & VP MEMBER CREATION AND CONTACT INBOX TESTS
+  console.log('\n📋 6. Executive Account Creation & Contact Messages Tests:')
+
+  // Authorization checks
+  assert(canAssignRole('PRESIDENT', 'VICE_PRESIDENT', false) === true, 'President can appoint a Vice-President')
+  assert(canAssignRole('PRESIDENT', 'BDE_MEMBER', false) === true, 'President can appoint a BDE Member')
+  assert(canAssignRole('VICE_PRESIDENT', 'BDE_MEMBER', false) === true, 'Vice-President can appoint a BDE Member')
+  assert(canAssignRole('VICE_PRESIDENT', 'PRESIDENT', false) === false, 'Vice-President cannot appoint a President')
+  assert(canAssignRole('VICE_PRESIDENT', 'VICE_PRESIDENT', false) === false, 'Vice-President cannot appoint another Vice-President')
+  assert(canAssignRole('PRESIDENT', 'PRESIDENT', true) === false, 'Self-role changes are strictly forbidden')
+
+  // Database ContactMessage persistence check
+  const testContact = await prisma.contactMessage.create({
+    data: {
+      name: 'Amine Testeur',
+      email: 'amine.test@insim-student.dz',
+      subject: 'Proposition Club Robotique',
+      category: 'Clubs & Vie Étudiante',
+      message: 'Bonjour Monsieur le Président et Vice-Président, nous souhaitons lancer un club robotique.',
+    },
+  })
+  assert(testContact.id !== undefined, 'Contact message successfully saved to database')
+  assert(testContact.category === 'Clubs & Vie Étudiante', 'Contact message category is correctly persisted')
+  assert(testContact.isRead === false, 'New contact message defaults to unread')
+
+  // Cleanup test contact message
+  await prisma.contactMessage.delete({ where: { id: testContact.id } })
+  assert(true, 'Test contact message cleaned up successfully')
+
   console.log('\n======================================================')
   console.log(`📊 TEST SUMMARY: ${passedTests}/${totalTests} Passed (${failedTests} Failed)`)
   console.log('======================================================\n')

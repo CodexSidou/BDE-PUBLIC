@@ -95,11 +95,11 @@ export default async function BadgesManagementPage() {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/verify"
-            className="px-4 py-2 rounded-xl bg-navy-850 hover:bg-navy-800 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 flex items-center gap-2 transition-colors"
+            href="/verify?mode=camera"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-accent to-accent-electric hover:opacity-90 text-white text-xs font-bold shadow-glow flex items-center gap-2 transition-all"
           >
-            <QrCode className="w-4 h-4 text-accent-glow" />
-            <span>Vérifier un QR</span>
+            <QrCode className="w-4 h-4 text-cyan-300" />
+            <span>Scanner un QR Badge</span>
           </Link>
         </div>
       </div>
