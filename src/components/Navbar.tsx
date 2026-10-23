@@ -107,20 +107,22 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent to-accent-electric flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="BDE INSIM Logo" 
+              className="w-10 h-10 rounded-xl object-cover shadow-glow group-hover:scale-105 transition-transform"
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-lg text-white tracking-tight">
-                  INSIM
+                  BDE
                 </span>
                 <span className="font-extrabold text-lg text-accent-glow">
-                  CONNECT
+                  INSIM
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 tracking-wider uppercase font-medium">
-                Plateforme Officielle BDE
+                Plus qu&apos;une école, une communauté
               </p>
             </div>
           </Link>

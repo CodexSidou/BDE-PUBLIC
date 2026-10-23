@@ -128,6 +128,19 @@ export async function POST(req: Request) {
       result: 'SUCCESS',
     })
 
+    // Real-time broadcast notification: all users are notified about the new project
+    try {
+      const { notifyAllUsers } = await import('@/lib/notifications')
+      await notifyAllUsers({
+        title: `Nouveau projet BDE : ${title}`,
+        message: `${user.firstName} ${user.lastName} (${user.role}) a lancé le projet "${title}". Rejoignez l'équipe !`,
+        type: 'PROJECT',
+        link: '/dashboard/projects',
+      })
+    } catch (notifErr) {
+      console.error('Failed to broadcast project notification:', notifErr)
+    }
+
     return NextResponse.json({ success: true, project })
   } catch (error) {
     console.error('Create project error:', error)

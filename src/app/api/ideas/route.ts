@@ -89,6 +89,18 @@ export async function POST(req: Request) {
       },
     })
 
+    try {
+      const { notifyBdeStaff } = await import('@/lib/notifications')
+      await notifyBdeStaff({
+        title: `Nouvelle idée : ${title}`,
+        message: `${isAnonymous ? 'Un étudiant' : `${user.firstName} ${user.lastName}`} a soumis une proposition dans "${category}".`,
+        type: 'IDEA',
+        link: '/dashboard/ideas',
+      })
+    } catch (err) {
+      console.error('Failed to notify BDE staff of idea:', err)
+    }
+
     return NextResponse.json({ success: true, idea })
   } catch (error) {
     console.error('Create idea error:', error)

@@ -10,15 +10,17 @@ export default function Footer() {
           {/* Brand & Mission */}
           <div className="space-y-4 md:col-span-1">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white">
-                <Shield className="w-4 h-4" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="BDE INSIM" 
+                className="w-8 h-8 rounded-lg object-cover"
+              />
               <span className="text-white font-bold text-base tracking-tight">
-                INSIM CONNECT
+                BDE INSIM
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              La plateforme officielle du Bureau des Étudiants de l&apos;Institut Supérieur de Management et d&apos;Informatique (INSIM). Synergie, projets, vie étudiante et gouvernance transparente.
+              La plateforme officielle du Bureau des Étudiants de l&apos;Institut Supérieur de Management et d&apos;Informatique (INSIM). Plus qu&apos;une école, une communauté.
             </p>
             <div className="flex items-center gap-2 text-xs text-accent-glow font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />

@@ -8,7 +8,7 @@ import { isFinanceManager, isBdeStaff } from './permissions'
  */
 export async function getFinancialSummary(
   userRole: UserRole,
-  openingBalance = 150000.0 // Default initial BDE treasury opening balance in DZD
+  openingBalance = 0.0 // Default initial BDE treasury opening balance starts at 0 DZD
 ): Promise<FinancialSummary> {
   // Check permission: at least BDE_MEMBER is required for investment summaries
   if (!isBdeStaff(userRole)) {
