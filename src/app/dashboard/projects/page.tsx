@@ -2,7 +2,6 @@ import React from 'react'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Sidebar from '@/components/Sidebar'
 import ProjectsDashboardClient from './ProjectsDashboardClient'
 
 export const dynamic = 'force-dynamic'
@@ -42,14 +41,9 @@ export default async function DashboardProjectsPage() {
   })
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <Sidebar user={user} />
-      <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-        <ProjectsDashboardClient
-          user={user}
-          initialProjects={JSON.parse(JSON.stringify(projects))}
-        />
-      </main>
-    </div>
+    <ProjectsDashboardClient
+      user={user}
+      initialProjects={JSON.parse(JSON.stringify(projects))}
+    />
   )
 }

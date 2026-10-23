@@ -2,7 +2,6 @@ import React from 'react'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Sidebar from '@/components/Sidebar'
 import NotificationsClient from './NotificationsClient'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +19,7 @@ export default async function NotificationsPage() {
     take: 50,
   })
 
-  // If new user with no notifications, let's create a welcome notification in the database
+  // If new user with no notifications, create welcome notification
   if (notifications.length === 0) {
     const welcomeNotif = await prisma.notification.create({
       data: {
@@ -35,11 +34,8 @@ export default async function NotificationsPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <Sidebar user={user} />
-      <main className="flex-1 p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
-        <NotificationsClient initialNotifications={JSON.parse(JSON.stringify(notifications))} />
-      </main>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <NotificationsClient initialNotifications={JSON.parse(JSON.stringify(notifications))} />
     </div>
   )
 }

@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { isExecutive } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
-import Sidebar from '@/components/Sidebar'
 import SettingsClient from './SettingsClient'
 
 export const dynamic = 'force-dynamic'
@@ -26,19 +25,14 @@ export default async function AdminSettingsPage() {
   ])
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <Sidebar user={user} />
-      <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
-        <SettingsClient
-          user={user}
-          stats={{
-            usersCount,
-            projectsCount,
-            eventsCount,
-            badgesCount,
-          }}
-        />
-      </main>
-    </div>
+    <SettingsClient
+      user={user}
+      stats={{
+        usersCount,
+        projectsCount,
+        eventsCount,
+        badgesCount,
+      }}
+    />
   )
 }

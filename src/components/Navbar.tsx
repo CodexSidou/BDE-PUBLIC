@@ -14,6 +14,8 @@ import {
   LayoutDashboard,
   Award,
   Sparkles,
+  Calendar,
+  FolderKanban,
 } from 'lucide-react'
 import { SessionUser } from '@/types'
 
@@ -323,16 +325,50 @@ export default function Navbar({
                   <p className="text-xs text-slate-400">{user.email}</p>
                 </div>
                 <Link
-                  href="/dashboard"
+                  href={isBde ? '/dashboard/bde' : '/dashboard'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent text-white text-sm font-semibold"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent text-white text-sm font-semibold shadow-glow"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>Accéder à mon Espace</span>
+                  <span>{isBde ? 'Console BDE & Gestion' : 'Accéder à mon Espace'}</span>
                 </Link>
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  <Link
+                    href="/dashboard/events"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-medium"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Événements</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/projects"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-medium"
+                  >
+                    <FolderKanban className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Projets</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/badges"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-medium"
+                  >
+                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Mon Badge</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-medium"
+                  >
+                    <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Mon Profil</span>
+                  </Link>
+                </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 text-sm font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 text-sm font-medium pt-2"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Se déconnecter</span>

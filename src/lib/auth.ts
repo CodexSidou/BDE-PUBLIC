@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import { prisma } from './prisma'
 import { SessionUser, UserRole } from '@/types'
 
@@ -58,7 +59,7 @@ export async function clearSessionCookie() {
   })
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<SessionUser | null> {
   try {
     const cookieStore = cookies()
     const token = cookieStore.get(AUTH_COOKIE_NAME)?.value
@@ -109,7 +110,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   } catch (err) {
     return null
   }
-}
+})
 
 export async function requireAuth(): Promise<SessionUser> {
   const user = await getCurrentUser()

@@ -2,7 +2,6 @@ import React from 'react'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Sidebar from '@/components/Sidebar'
 import DashboardIdeasClient from './DashboardIdeasClient'
 
 export const dynamic = 'force-dynamic'
@@ -67,16 +66,11 @@ export default async function DashboardIdeasPage() {
   })
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <Sidebar user={user} />
-      <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-        <DashboardIdeasClient
-          user={user}
-          initialIdeas={JSON.parse(JSON.stringify(sanitizedIdeas))}
-          initialPolls={JSON.parse(JSON.stringify(polls))}
-          initialUserVotes={JSON.parse(JSON.stringify(userVotes))}
-        />
-      </main>
-    </div>
+    <DashboardIdeasClient
+      user={user}
+      initialIdeas={JSON.parse(JSON.stringify(sanitizedIdeas))}
+      initialPolls={JSON.parse(JSON.stringify(polls))}
+      initialUserVotes={JSON.parse(JSON.stringify(userVotes))}
+    />
   )
 }

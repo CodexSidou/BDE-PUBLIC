@@ -21,9 +21,13 @@ export default async function RootLayout({
 
   let unreadNotificationsCount = 0
   if (user) {
-    unreadNotificationsCount = await prisma.notification.count({
-      where: { userId: user.id, isRead: false },
-    })
+    try {
+      unreadNotificationsCount = await prisma.notification.count({
+        where: { userId: user.id, isRead: false },
+      })
+    } catch {
+      unreadNotificationsCount = 0
+    }
   }
 
   return (

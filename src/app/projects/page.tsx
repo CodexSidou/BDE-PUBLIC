@@ -1,11 +1,14 @@
 import React from 'react'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth'
 import { FolderKanban, Users, Calendar, ArrowRight, DollarSign, Sparkles } from 'lucide-react'
 
 export const revalidate = 0
 
 export default async function PublicProjectsPage() {
+  const user = await getCurrentUser()
+
   const projects = await prisma.project.findMany({
     where: { isPublic: true },
     include: {
@@ -86,10 +89,10 @@ export default async function PublicProjectsPage() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href={user ? '/dashboard/projects' : '/login?callback=/dashboard/projects'}
                   className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 flex items-center gap-1 transition-colors"
                 >
-                  <span>Participer</span>
+                  <span>{user ? 'Rejoindre l\'Équipe' : 'Participer'}</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>

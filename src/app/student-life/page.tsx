@@ -8,9 +8,15 @@ import {
   HeartHandshake,
   Compass,
   ArrowRight,
+  CheckCircle2,
 } from 'lucide-react'
+import { getCurrentUser } from '@/lib/auth'
 
-export default function StudentLifePage() {
+export const revalidate = 0
+
+export default async function StudentLifePage() {
+  const user = await getCurrentUser()
+
   const clubs = [
     {
       title: 'INSIM Dev & AI Club',
@@ -84,10 +90,10 @@ export default function StudentLifePage() {
                   {c.members} étudiants actifs
                 </span>
                 <Link
-                  href="/login"
+                  href={user ? '/dashboard/projects' : '/login?callback=/student-life'}
                   className="px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-xs shadow-glow flex items-center gap-1 transition-all"
                 >
-                  <span>Rejoindre</span>
+                  <span>{user ? 'Rejoindre le Club' : 'Se Connecter'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

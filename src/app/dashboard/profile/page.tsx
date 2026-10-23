@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Sidebar from '@/components/Sidebar'
 import {
   User,
   Shield,
@@ -55,11 +54,8 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <Sidebar user={userSession} />
-
-      <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
-        {/* Top Header */}
+    <div className="space-y-8">
+      {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
@@ -272,7 +268,6 @@ export default async function ProfilePage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
   )
 }
