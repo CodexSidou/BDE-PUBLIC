@@ -1,0 +1,586 @@
+// INSIM CONNECT - Comprehensive Prisma Database Schema
+// Database: PostgreSQL on Neon
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// 8 Mandatory Primary Roles
+enum UserRole {
+  VISITOR
+  STUDENT
+  CLASS_DELEGATE
+  BDE_MEMBER
+  PROJECT_MANAGER
+  TREASURER
+  VICE_PRESIDENT
+  PRESIDENT
+}
+
+enum ProjectStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectMemberRole {
+  MEMBER
+  LEAD
+  COORDINATOR
+  TECHNICAL
+  DESIGNER
+  LOGISTICS
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  REVOKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum BadgeStatus {
+  VALID
+  EXPIRED
+  REVOKED
+}
+
+enum ExpenseCategory {
+  LOGISTICS
+  MARKETING
+  EQUIPMENT
+  REFRESHMENTS
+  PRINTING
+  TRANSPORTATION
+  OTHER
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PAID
+  CANCELLED
+}
+
+enum TransactionType {
+  INCOMING_FUNDS
+  EXPENSE_PAYMENT
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum TransactionStatus {
+  CONFIRMED
+  PENDING
+  REVERSED
+}
+
+enum IdeaStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum AuditResult {
+  SUCCESS
+  DENIED
+  FAILED
+}
+
+enum NotificationType {
+  SYSTEM
+  PROJECT
+  TASK
+  EVENT
+  FINANCE
+  BADGE
+  IDEA
+}
+
+// 1. User & Account Management
+model User {
+  id              String       @id @default(uuid())
+  email           String       @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  studentNumber   String?      @unique
+  phone           String?
+  avatarUrl       String?
+  department      String?      // e.g. "Informatique & SI", "Management", "Finance"
+  studyYear       String?      // e.g. "L1", "L2", "L3", "M1", "M2"
+  role            UserRole     @default(STUDENT)
+  isActive        Boolean      @default(true)
+  emailVerified   DateTime?
+  
+  // Relations
+  managedProjects      Project[]             @relation("ProjectManager")
+  projectMemberships   ProjectMembership[]
+  createdTasks         Task[]                @relation("TaskCreator")
+  assignedTasks        Task[]                @relation("TaskAssignee")
+  taskComments         TaskComment[]
+  organizedEvents      Event[]               @relation("EventOrganizer")
+  eventRegistrations   EventRegistration[]
+  badges               DigitalBadge[]        @relation("UserBadges")
+  issuedBadges         DigitalBadge[]        @relation("BadgeIssuer")
+  submittedExpenses    ExpenseRequest[]      @relation("ExpenseRequester")
+  reviewedExpenses     ExpenseRequest[]      @relation("ExpenseReviewer")
+  paidExpenses         ExpenseRequest[]      @relation("ExpensePayer")
+  recordedTransactions FinancialTransaction[] @relation("TransactionRecorder")
+  approvedTransactions FinancialTransaction[] @relation("TransactionApprover")
+  ideas                Idea[]
+  votes                Vote[]
+  createdPolls         Poll[]
+  notifications        Notification[]
+  auditLogs            AuditLog[]            @relation("UserAuditLogs")
+  announcements        Announcement[]
+  shareLinks           ShareLink[]
+  
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([role])
+  @@index([email])
+}
+
+// 2. Projects & Collaborations
+model Project {
+  id            String             @id @default(uuid())
+  title         String
+  slug          String             @unique
+  description   String             @db.Text
+  category      String             // "Tech", "Culture", "Sports", "Charity", "Academics"
+  coverImage    String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        ProjectStatus      @default(PLANNED)
+  isPublic      Boolean            @default(false)
+  
+  managerId     String
+  manager       User               @relation("ProjectManager", fields: [managerId], references: [id])
+  
+  memberships   ProjectMembership[]
+  tasks         Task[]
+  events        Event[]
+  budget        ProjectBudget?
+  expenses      ExpenseRequest[]
+  transactions  FinancialTransaction[]
+  badges        DigitalBadge[]
+  shareLinks    ShareLink[]
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([status])
+  @@index([managerId])
+  @@index([isPublic])
+}
+
+model ProjectMembership {
+  id              String            @id @default(uuid())
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  projectRole     ProjectMemberRole @default(MEMBER)
+  status          MembershipStatus  @default(ACTIVE)
+  joinedAt        DateTime          @default(now())
+  endedAt         DateTime?
+  canManageTasks  Boolean           @default(false)
+  canRequestExpenses Boolean        @default(false)
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// 3. Tasks
+model Task {
+  id            String         @id @default(uuid())
+  projectId     String
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?        @db.Text
+  priority      TaskPriority   @default(MEDIUM)
+  status        TaskStatus     @default(TODO)
+  
+  creatorId     String
+  creator       User           @relation("TaskCreator", fields: [creatorId], references: [id])
+  
+  assigneeId    String?
+  assignee      User?          @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  
+  startDate     DateTime?
+  dueDate       DateTime?
+  completedAt   DateTime?
+  
+  comments      TaskComment[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+}
+
+model TaskComment {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+}
+
+// 4. Events
+model Event {
+  id            String             @id @default(uuid())
+  title         String
+  slug          String             @unique
+  description   String             @db.Text
+  location      String
+  startsAt      DateTime
+  endsAt        DateTime
+  capacity      Int?
+  isPublic      Boolean            @default(true)
+  status        EventStatus        @default(UPCOMING)
+  coverImage    String?
+  
+  organizerId   String
+  organizer     User               @relation("EventOrganizer", fields: [organizerId], references: [id])
+  
+  projectId     String?
+  project       Project?           @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  registrations EventRegistration[]
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([startsAt])
+  @@index([status])
+  @@index([isPublic])
+}
+
+model EventRegistration {
+  id           String    @id @default(uuid())
+  eventId      String
+  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registeredAt DateTime  @default(now())
+  attended     Boolean   @default(false)
+  checkedInAt  DateTime?
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+// 5. INSIM ID: Digital Badges & QR Verification
+model DigitalBadge {
+  id            String       @id @default(uuid())
+  badgeCode     String       @unique // Secure, unguessable cryptographic token for QR verification
+  userId        String
+  user          User         @relation("UserBadges", fields: [userId], references: [id], onDelete: Cascade)
+  
+  projectId     String?
+  project       Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  roleTitle     String       // e.g. "Responsable Événement", "BDE Membre", "Délégué de classe"
+  issueDate     DateTime     @default(now())
+  expiresAt     DateTime?
+  status        BadgeStatus  @default(VALID)
+  
+  issuerId      String?
+  issuer        User?        @relation("BadgeIssuer", fields: [issuerId], references: [id], onDelete: SetNull)
+  
+  revokedAt     DateTime?
+  revokedReason String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([badgeCode])
+  @@index([userId])
+  @@index([status])
+}
+
+// 6. Finances: Budgets, Expense Requests, Transactions
+model ProjectBudget {
+  id              String           @id @default(uuid())
+  projectId       String           @unique
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  allocatedAmount Decimal          @default(0.00) @db.Decimal(12, 2)
+  notes           String?
+  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ExpenseRequest {
+  id              String            @id @default(uuid())
+  title           String
+  description     String            @db.Text
+  category        ExpenseCategory   @default(OTHER)
+  requestedAmount Decimal           @db.Decimal(12, 2)
+  
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  requesterId     String
+  requester       User              @relation("ExpenseRequester", fields: [requesterId], references: [id])
+  
+  receiptUrl      String?           // Supporting document reference or storage path
+  receiptFileName String?
+  
+  status          ExpenseStatus     @default(SUBMITTED)
+  
+  reviewerId      String?
+  reviewer        User?             @relation("ExpenseReviewer", fields: [reviewerId], references: [id])
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  
+  paidAt          DateTime?
+  paidById        String?
+  paidBy          User?             @relation("ExpensePayer", fields: [paidById], references: [id])
+  
+  transactions    FinancialTransaction[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([requesterId])
+  @@index([status])
+}
+
+model FinancialTransaction {
+  id                String             @id @default(uuid())
+  transactionCode   String             @unique // e.g. "TX-2026-0001"
+  type              TransactionType
+  amount            Decimal            @db.Decimal(12, 2)
+  currency          String             @default("DZD")
+  date              DateTime           @default(now())
+  
+  projectId         String?
+  project           Project?           @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  expenseRequestId  String?
+  expenseRequest    ExpenseRequest?    @relation(fields: [expenseRequestId], references: [id], onDelete: SetNull)
+  
+  recordedById      String
+  recordedBy        User               @relation("TransactionRecorder", fields: [recordedById], references: [id])
+  
+  approvedById      String?
+  approvedBy        User?              @relation("TransactionApprover", fields: [approvedById], references: [id])
+  
+  status            TransactionStatus  @default(CONFIRMED)
+  description       String             @db.Text
+  sourceOrPayee     String             // Donor, Sponsor, Vendor name, Bank transfer, etc.
+  receiptReference  String?
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([type])
+  @@index([projectId])
+  @@index([status])
+  @@index([date])
+}
+
+// 7. Idea Box & Polls
+model Idea {
+  id           String      @id @default(uuid())
+  title        String
+  description  String      @db.Text
+  category     String      // "Vie Étudiante", "Pédagogie", "Sport", "Culture", "Technologie"
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  isAnonymous  Boolean     @default(false)
+  status       IdeaStatus  @default(SUBMITTED)
+  adminFeedback String?    @db.Text
+  upvotesCount Int         @default(0)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([status])
+  @@index([authorId])
+}
+
+model Poll {
+  id                 String       @id @default(uuid())
+  title              String
+  description        String?      @db.Text
+  creatorId          String
+  creator            User         @relation(fields: [creatorId], references: [id])
+  isPublic           Boolean      @default(true)
+  allowsMultipleVotes Boolean     @default(false)
+  closesAt           DateTime?
+  isClosed           Boolean      @default(false)
+  
+  options            PollOption[]
+  votes              Vote[]
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([isClosed])
+}
+
+model PollOption {
+  id         String   @id @default(uuid())
+  pollId     String
+  poll       Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text       String
+  votesCount Int      @default(0)
+  votes      Vote[]
+
+  @@index([pollId])
+}
+
+model Vote {
+  id         String     @id @default(uuid())
+  pollId     String
+  poll       Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId   String
+  option     PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime   @default(now())
+
+  @@unique([pollId, userId]) // 1 vote per user per poll
+  @@index([pollId])
+  @@index([userId])
+}
+
+// 8. Secure Project Sharing
+model ShareLink {
+  id             String    @id @default(uuid())
+  token          String    @unique // Secure url token
+  projectId      String
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creatorId      String
+  creator        User      @relation(fields: [creatorId], references: [id])
+  scope          String    @default("VIEW_ONLY")
+  passwordHash   String?   // Optional password
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  accessCount    Int       @default(0)
+  lastAccessedAt DateTime?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([token])
+  @@index([projectId])
+}
+
+// 9. Notifications
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String           @db.Text
+  type      NotificationType @default(SYSTEM)
+  link      String?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+}
+
+// 10. Audit Logs
+model AuditLog {
+  id           String      @id @default(uuid())
+  actorId      String?
+  actorEmail   String?
+  actor        User?       @relation("UserAuditLogs", fields: [actorId], references: [id], onDelete: SetNull)
+  action       String      // e.g. "USER_ROLE_CHANGED", "EXPENSE_APPROVED", "BADGE_REVOKED"
+  resourceType String      // "USER", "PROJECT", "EXPENSE", "TRANSACTION", "BADGE", "SETTINGS"
+  resourceId   String?
+  details      String?     @db.Text
+  ipAddress    String?
+  result       AuditResult @default(SUCCESS)
+  createdAt    DateTime    @default(now())
+
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+}
+
+// 11. Announcements & News
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  category    String   // "Événement", "Bourse", "Académique", "BDE", "Club"
+  priority    String   @default("NORMAL") // "NORMAL", "IMPORTANT", "URGENT"
+  isPublic    Boolean  @default(true)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublic])
+  @@index([publishedAt])
+}
+
+// 12. Platform Settings
+model PlatformSettings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+}
